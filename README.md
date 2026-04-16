@@ -1,28 +1,26 @@
 # Multi-language-translator-using-azure
 
-A lightweight 5-language translator app built with:
+A lightweight multi-language translator app built with:
 
 - Frontend: single HTML file with embedded CSS and JavaScript
-- Backend: single Python file using only standard library modules
+- Backend: Python/Node.js based backend for Vercel deployment
 - Cloud service: Azure AI Translator Text API
 
-The application lets you paste text once and get translations in five languages at the same time.
+The application lets you paste text once and get translations in selected languages at the same time.
 
 ## Features
 
-- Single-page UI served by backend at the root route
-- Translate one input into 5 target languages in one request
+- Single-page UI with dynamic frontend
+- Translate one input into your chosen custom selection of languages in one request
 - User enters Azure endpoint, key, and region directly in UI
 - No external frontend or backend dependencies required
 - Basic error handling for invalid JSON, API failures, and connectivity issues
 
-Default target languages:
+Supported languages out of the box:
 
-- Spanish (es)
-- French (fr)
-- German (de)
-- Hindi (hi)
-- Arabic (ar)
+- Spanish (es), French (fr), German (de), Hindi (hi), Arabic (ar), 
+- Italian (it), Japanese (ja), Portuguese (pt), Russian (ru), Chinese (zh-Hans),
+- Bengali (bn), Korean (ko).
 
 ## Project Structure
 
@@ -57,7 +55,8 @@ http://127.0.0.1:5000
    - Azure endpoint
    - Azure translator key
    - Region (recommended/usually required)
-1. Enter source text and click Translate to 5 Languages.
+6. Select 1 or more languages to translate into.
+7. Enter source text and click Translate Text.
 
 ## Azure Input Format
 

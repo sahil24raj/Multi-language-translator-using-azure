@@ -30,10 +30,10 @@ class TranslatorHandler(BaseHTTPRequestHandler):
             self.wfile.write(INDEX_FILE.read_bytes())
             return
 
-        if self.path == "/translate":
+        if self.path in ["/translate", "/api/translate"]:
             self._set_headers(405)
             self.wfile.write(
-                json.dumps({"error": "Use POST /translate with a JSON body."}).encode("utf-8")
+                json.dumps({"error": "Use POST /api/translate with a JSON body."}).encode("utf-8")
             )
             return
 
@@ -44,7 +44,7 @@ class TranslatorHandler(BaseHTTPRequestHandler):
         self._set_headers(204)
 
     def do_POST(self):
-        if self.path != "/translate":
+        if self.path not in ["/translate", "/api/translate"]:
             self._set_headers(404)
             self.wfile.write(json.dumps({"error": "Route not found."}).encode("utf-8"))
             return

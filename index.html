@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>5-Language Translator</title>
+  <title>Multi-Language Translator</title>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -139,6 +139,47 @@
 
     .error { color: var(--danger); }
 
+    .language-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
+
+    .lang-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      user-select: none;
+      color: var(--ink);
+    }
+
+    .lang-checkbox-label:hover {
+      border-color: var(--accent-2);
+      transform: translateY(-1px);
+    }
+
+    .lang-checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .lang-checkbox-label.selected {
+      border-color: var(--accent);
+      background: #e6f7f5;
+      font-weight: 600;
+    }
+
     .results {
       display: grid;
       gap: 12px;
@@ -176,8 +217,8 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="title">Azure 5-Language Translator</h1>
-    <p class="subtitle">Enter your Azure Translator endpoint and key in this page, then translate text into five languages at once.</p>
+    <h1 class="title">Azure Multi-Language Translator</h1>
+    <p class="subtitle">Enter your Azure Translator endpoint and key in this page, then translate text into your selected languages at once.</p>
 
     <section class="panel">
       <div class="row">
@@ -198,11 +239,18 @@
 
     <section class="panel">
       <div class="field">
+        <label>Target Languages (Select as many as you want)</label>
+        <div class="language-grid" id="languageGrid"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="field">
         <label for="inputText">Text to Translate</label>
         <textarea id="inputText" class="text-area" placeholder="Type the source text here..."></textarea>
       </div>
       <div class="actions">
-        <button id="translateBtn" class="primary">Translate to 5 Languages</button>
+        <button id="translateBtn" class="primary">Translate Text</button>
         <button id="clearBtn" class="ghost" type="button">Clear</button>
       </div>
       <div id="status" class="status"></div>
@@ -211,12 +259,19 @@
   </div>
 
   <script>
-    const targetLanguages = [
-      { code: "es", name: "Spanish" },
+    const availableLanguages = [
+      { code: "ar", name: "Arabic" },
+      { code: "zh-Hans", name: "Chinese (Simplified)" },
       { code: "fr", name: "French" },
       { code: "de", name: "German" },
       { code: "hi", name: "Hindi" },
-      { code: "ar", name: "Arabic" }
+      { code: "it", name: "Italian" },
+      { code: "ja", name: "Japanese" },
+      { code: "pt", name: "Portuguese" },
+      { code: "ru", name: "Russian" },
+      { code: "es", name: "Spanish" },
+      { code: "bn", name: "Bengali" },
+      { code: "ko", name: "Korean" }
     ];
 
     const endpointInput = document.getElementById("endpoint");
@@ -227,26 +282,65 @@
     const clearBtn = document.getElementById("clearBtn");
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
+    const languageGrid = document.getElementById("languageGrid");
+
+    // Initialize checkboxes
+    availableLanguages.forEach(lang => {
+      const label = document.createElement("label");
+      label.className = "lang-checkbox-label";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.value = lang.code;
+      // Default to picking Hindi and Spanish for demo
+      if (lang.code === "hi" || lang.code === "es") {
+        cb.checked = true;
+        label.classList.add("selected");
+      }
+
+      cb.addEventListener("change", () => {
+        if (cb.checked) {
+          label.classList.add("selected");
+        } else {
+          label.classList.remove("selected");
+        }
+      });
+
+      const span = document.createElement("span");
+      span.textContent = lang.name;
+
+      label.appendChild(cb);
+      label.appendChild(span);
+      languageGrid.appendChild(label);
+    });
+
+    function getSelectedLanguages() {
+      const checkboxes = document.querySelectorAll('#languageGrid input[type="checkbox"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
 
     function showStatus(message, isError = false) {
       statusEl.textContent = message;
       statusEl.className = isError ? "status error" : "status";
     }
 
-    function renderResults(resultMap) {
+    function renderResults(resultMap, targets) {
       resultsEl.innerHTML = "";
 
-      for (const lang of targetLanguages) {
+      for (const langCode of targets) {
+        const langInfo = availableLanguages.find(l => l.code === langCode);
+        const langName = langInfo ? langInfo.name : langCode;
+
         const card = document.createElement("article");
         card.className = "card";
 
         const header = document.createElement("h3");
         header.className = "lang";
-        header.textContent = `${lang.name} (${lang.code})`;
+        header.textContent = `${langName} (${langCode})`;
 
         const body = document.createElement("p");
         body.className = "translated";
-        body.textContent = resultMap[lang.code] || "No translation returned.";
+        body.textContent = resultMap[langCode] || "No translation returned.";
 
         card.appendChild(header);
         card.appendChild(body);
@@ -260,8 +354,15 @@
       const region = regionInput.value.trim();
       const text = inputText.value.trim();
 
+      const selectedTargets = getSelectedLanguages();
+
       if (!endpoint || !key || !text) {
         showStatus("Endpoint, key, and source text are required.", true);
+        return;
+      }
+
+      if (selectedTargets.length === 0) {
+        showStatus("Please select at least one target language.", true);
         return;
       }
 
@@ -269,7 +370,7 @@
       showStatus("Translating...");
 
       try {
-        const response = await fetch("/translate", {
+        const response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -277,17 +378,27 @@
             key,
             region,
             text,
-            targets: targetLanguages.map((lang) => lang.code)
+            targets: selectedTargets
           })
         });
 
-        const payload = await response.json();
+        const contentType = response.headers.get("content-type") || "";
+        let payload = {};
+
+        if (contentType.includes("application/json")) {
+          payload = await response.json();
+        } else {
+          const rawText = await response.text();
+          throw new Error(
+            `Unexpected response from server (${response.status}). ${rawText.slice(0, 120)}`
+          );
+        }
 
         if (!response.ok) {
           throw new Error(payload.error || "Translation failed.");
         }
 
-        renderResults(payload.translations || {});
+        renderResults(payload.translations || {}, selectedTargets);
         showStatus("Translation completed.");
       } catch (error) {
         showStatus(error.message || "Something went wrong.", true);
