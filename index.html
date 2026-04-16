@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5-Language Translator</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #1f2a44;
+      --muted: #5f6b85;
+      --accent: #0f766e;
+      --accent-2: #14b8a6;
+      --border: #d9e2f1;
+      --danger: #b91c1c;
+      --shadow: 0 10px 30px rgba(31, 42, 68, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, #dbeafe 0%, transparent 45%),
+        radial-gradient(circle at 80% 85%, #ccfbf1 0%, transparent 40%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, textarea, button {
+      font: inherit;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fbfdff;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent-2);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    }
+
+    .text-area {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(15, 118, 110, 0.28);
+    }
+
+    .ghost {
+      background: #e6eefc;
+      color: #24407a;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .status {
+      min-height: 1.3rem;
+      margin-top: 8px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .error { color: var(--danger); }
+
+    .results {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 8px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fcfdff;
+      padding: 12px;
+    }
+
+    .lang {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: #35518f;
+      font-weight: 700;
+    }
+
+    .translated {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.35;
+      color: #1f2a44;
+      min-height: 56px;
+    }
+
+    @media (max-width: 880px) {
+      .row { grid-template-columns: 1fr; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Azure 5-Language Translator</h1>
+    <p class="subtitle">Enter your Azure Translator endpoint and key in this page, then translate text into five languages at once.</p>
+
+    <section class="panel">
+      <div class="row">
+        <div class="field">
+          <label for="endpoint">Azure Endpoint</label>
+          <input id="endpoint" type="text" placeholder="https://api.cognitive.microsofttranslator.com" />
+        </div>
+        <div class="field">
+          <label for="key">Azure Translator Key</label>
+          <input id="key" type="password" placeholder="Ocp-Apim-Subscription-Key" />
+        </div>
+        <div class="field">
+          <label for="region">Region (optional, often required)</label>
+          <input id="region" type="text" placeholder="eastus" />
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="field">
+        <label for="inputText">Text to Translate</label>
+        <textarea id="inputText" class="text-area" placeholder="Type the source text here..."></textarea>
+      </div>
+      <div class="actions">
+        <button id="translateBtn" class="primary">Translate to 5 Languages</button>
+        <button id="clearBtn" class="ghost" type="button">Clear</button>
+      </div>
+      <div id="status" class="status"></div>
+      <div class="results" id="results"></div>
+    </section>
+  </div>
+
+  <script>
+    const targetLanguages = [
+      { code: "es", name: "Spanish" },
+      { code: "fr", name: "French" },
+      { code: "de", name: "German" },
+      { code: "hi", name: "Hindi" },
+      { code: "ar", name: "Arabic" }
+    ];
+
+    const endpointInput = document.getElementById("endpoint");
+    const keyInput = document.getElementById("key");
+    const regionInput = document.getElementById("region");
+    const inputText = document.getElementById("inputText");
+    const translateBtn = document.getElementById("translateBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+
+    function showStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.className = isError ? "status error" : "status";
+    }
+
+    function renderResults(resultMap) {
+      resultsEl.innerHTML = "";
+
+      for (const lang of targetLanguages) {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const header = document.createElement("h3");
+        header.className = "lang";
+        header.textContent = `${lang.name} (${lang.code})`;
+
+        const body = document.createElement("p");
+        body.className = "translated";
+        body.textContent = resultMap[lang.code] || "No translation returned.";
+
+        card.appendChild(header);
+        card.appendChild(body);
+        resultsEl.appendChild(card);
+      }
+    }
+
+    async function translateText() {
+      const endpoint = endpointInput.value.trim();
+      const key = keyInput.value.trim();
+      const region = regionInput.value.trim();
+      const text = inputText.value.trim();
+
+      if (!endpoint || !key || !text) {
+        showStatus("Endpoint, key, and source text are required.", true);
+        return;
+      }
+
+      translateBtn.disabled = true;
+      showStatus("Translating...");
+
+      try {
+        const response = await fetch("/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint,
+            key,
+            region,
+            text,
+            targets: targetLanguages.map((lang) => lang.code)
+          })
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Translation failed.");
+        }
+
+        renderResults(payload.translations || {});
+        showStatus("Translation completed.");
+      } catch (error) {
+        showStatus(error.message || "Something went wrong.", true);
+      } finally {
+        translateBtn.disabled = false;
+      }
+    }
+
+    translateBtn.addEventListener("click", translateText);
+
+    clearBtn.addEventListener("click", () => {
+      inputText.value = "";
+      showStatus("");
+      resultsEl.innerHTML = "";
+    });
+  </script>
+</body>
+</html>
