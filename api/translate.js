@@ -17,6 +17,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "endpoint, key, text, and targets are required." });
   }
 
+  // Remove any spaces, newlines, or invisible characters that sometimes copy over from Azure portal
+  const cleanKey = String(key).replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+  const cleanRegion = String(region).replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+
   const baseEndpoint = String(endpoint).trim().replace(/\/+$/, "");
   const query = new URLSearchParams({ "api-version": "3.0" });
   for (const lang of targets) {
@@ -27,12 +31,12 @@ export default async function handler(req, res) {
 
   const headers = {
     "Content-Type": "application/json",
-    "Ocp-Apim-Subscription-Key": String(key).trim(),
+    "Ocp-Apim-Subscription-Key": cleanKey,
     "X-ClientTraceId": Math.random().toString(36).substring(2) + Date.now().toString(36)
   };
 
-  if (region && String(region).trim()) {
-    headers["Ocp-Apim-Subscription-Region"] = String(region).trim();
+  if (cleanRegion) {
+    headers["Ocp-Apim-Subscription-Region"] = cleanRegion;
   }
 
   try {
