@@ -314,6 +314,17 @@
       languageGrid.appendChild(label);
     });
 
+    // Load saved credentials
+    if (localStorage.getItem("azure_endpoint")) {
+      endpointInput.value = localStorage.getItem("azure_endpoint");
+    }
+    if (localStorage.getItem("azure_key")) {
+      keyInput.value = localStorage.getItem("azure_key");
+    }
+    if (localStorage.getItem("azure_region")) {
+      regionInput.value = localStorage.getItem("azure_region");
+    }
+
     function getSelectedLanguages() {
       const checkboxes = document.querySelectorAll('#languageGrid input[type="checkbox"]:checked');
       return Array.from(checkboxes).map(cb => cb.value);
@@ -365,6 +376,11 @@
         showStatus("Please select at least one target language.", true);
         return;
       }
+
+      // Save valid inputs to local storage
+      localStorage.setItem("azure_endpoint", endpoint);
+      localStorage.setItem("azure_key", key);
+      localStorage.setItem("azure_region", region);
 
       translateBtn.disabled = true;
       showStatus("Translating...");
